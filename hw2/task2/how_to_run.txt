@@ -1,0 +1,45 @@
+Project: Data Science Assignment - Part 2 (Kafka Consumer)
+
+System Specifications:
+- OS: Windows 11
+- Java version: 21.0.2 (64-bit, Java(TM) SE Runtime Environment build 21.0.2+13-LTS-58)
+- Kafka version: kafka_2.13-3.5.0 (with ZooKeeper)
+- Python library: kafka-python 2.3.1
+
+How to run the consumer:
+
+1. Start ZooKeeper:
+   cd C:\kafka\kafka_2.13-3.5.0
+   .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+
+2. Start Kafka broker:
+   cd C:\kafka\kafka_2.13-3.5.0
+   .\bin\windows\kafka-server-start.bat .\config\server.properties
+
+3. (Optional) Create topics manually (auto-create is also enabled):
+   cd C:\kafka\kafka_2.13-3.5.0\bin\windows
+   .\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic ashpaz.order
+   .\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic ashpaz.valid
+   .\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic ashpaz.error_log
+
+4. Run consumer (in a separate terminal with Python):
+   python consumer.py
+
+5. Send a test order (optional):
+   python test_producer.py
+
+Expected output in consumer terminal:
+   WARNING - Invalid order 12345: errors = ['INVALID_PHONE', 'ORDER_MODE_CONFLICT']
+
+Validation rules implemented (stateless, no database access):
+1. Phone number must start with +91 or 080 → error INVALID_PHONE
+2. request_online and request_table cannot both be true → error ORDER_MODE_CONFLICT
+3. order_price must equal sum(unit_price * quantity) → error PRICE_MISMATCH
+
+Error message format in ashpaz.error_log:
+{
+  "order_id": "...",
+  "error_type": "MULTI or single error",
+  "error_reason": ["error1", "error2", ...],
+  "original_order": { ... }
+}
